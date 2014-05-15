@@ -23,6 +23,7 @@ private:
 
 public:
 	Inventory(); //Constructor: Instantiate the inventory and add items
+	RFile f; // The random access file controller
 	void addItem(Item item); //Add an item to the inventory -- REMOVED BECAUSE FIXED ARRAY
 	void removeItem(string UPC); //Remove an item from the inventory -- REMOVED BECAUSE FIXED ARRAY
 	void adjustStock(string UPC, int newQty); //Update the stock quantity of an inventory item
@@ -30,6 +31,7 @@ public:
 	void changePrice(string UPC, float newPrice); //Update the price of an inventory item
 	Item * findItem(string UPC); //Retrieve item from the inventory reference
 	stack <int> deleted; // Stack of deleted record references
+	int numRecords; // Reflects the true number of items (*RFile count() used for iteration)
 };
 
 #endif;
