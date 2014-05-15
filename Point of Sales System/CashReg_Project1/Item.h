@@ -19,6 +19,7 @@ public:
 	float price;
 	string UPC;
 	int QOH;//quantity on hand
+	bool isDeleted;
 };
 
 #endif;

@@ -17,127 +17,97 @@ using namespace std;
 
 Inventory::Inventory() //Constructor
 {
-	// Populate inventory items with hard-coded values
+	f.FOpen("inventory.dat", sizeof(Item)); // Opens the inventory file
+	buildStack(); // Build the deleted records stack
+}
 
-	items[0].description = "Watch";
-	items[0].price = 40.00;
-	items[0].QOH = 10;
-	items[0].UPC = "00000";
 
-	items[1].description = "Ring";
-	items[1].price = 100.00;
-	items[1].QOH = 10;
-	items[1].UPC = "11111";
+// Adds an item to the inventory
+void Inventory::addItem(Item item)
+{
+	if(!deleted.empty()) // Check if stack is empty
+	{
+		int replace = deleted.pop();
+		f.update(replace, &item); // Swap deleted value with new item
+	}
+	else
+	{
+		f.write(&item); // write the record at the end
+	}
+}
 
-	items[2].description = "Toothbrush";
-	items[2].price = 5.50;
-	items[2].QOH = 10;
-	items[2].UPC = "22222";
+void Inventory::removeItem(string UPC)
+{
+	fileSize = f.count(); // get number of allocated records in the file
+	Item temp; // temp store for item being read
 
-	items[3].description = "Milk";
-	items[3].price = 2.75;
-	items[3].QOH = 10;
-	items[3].UPC = "33333";
-
-	items[4].description = "Soda";
-	items[4].price = 0.75;
-	items[4].QOH = 10;
-	items[4].UPC = "44444";
-
-	items[5].description = "Sandwich";
-	items[5].price = 3.45;
-	items[5].QOH = 10;
-	items[5].UPC = "55555";
-
-	items[6].description = "Gum";
-	items[6].price = 0.25;
-	items[6].QOH = 10;
-	items[6].UPC = "66666";
-
-	items[7].description = "Pen";
-	items[7].price = 1.00;
-	items[7].QOH = 10;
-	items[7].UPC = "77777";
-
-	items[8].description = "Lotto";
-	items[8].price = 2.75;
-	items[8].QOH = 10;
-	items[8].UPC = "88888";
-
-	items[9].description = "Magazine";
-	items[9].price = 10.00;
-	items[9].QOH = 10;
-	items[9].UPC = "99999";
+	// iterate through the records
+	for(int i = 0; i < fileSize; i++)
+	{
+		if(f.read(i, &temp) && !temp.UPC.compare(UPC)) // item with correct UPC found
+		{
+			temp.isDeleted = True; // set deleted flag on the item - *I added this to the struct
+			f.update(i, &temp); // overwrite the current entry (isDeleted = false)
+			break; // record found -> break out of loop
+		}
+	}
 }
 
 // Updates the stock of an item in the inventory
 void Inventory::adjustStock(string UPC, int newQty)
 {
-	// Search for the item in the inventory
-	int index = findIndex(UPC);
+	fileSize = f.count(); // get number of allocated records in the file
+	Item temp; // temp store for item being read
 
-	// Item was found in the inventory
-	if(index > -1)
+	// iterate through the records
+	for(int i = 0; i < fileSize; i++)
 	{
-		items[index].QOH = newQty;
-	}
-	else
-	{
-		//cout << "Error: item not found in inventory";
+		if(f.read(i, &temp) && !temp.UPC.compare(UPC)) // item with correct UPC found
+		{
+			temp.QOH = newQty; // Update the quantity
+			f.update(i, &temp);
+			break; // record found -> break out of loop
+		}
 	}
 }
 
 // Updates the description of an item in the inventory
 void Inventory::changeDescription(string UPC, string newDescription)
 {
-	// Search for the item in the inventory
-	int index = findIndex(UPC);
+	fileSize = f.count(); // get number of allocated records in the file
+	Item temp; // temp store for item being read
 
-	// Item was found in the inventory
-	if(index > -1)
+	// iterate through the records
+	for(int i = 0; i < fileSize; i++)
 	{
-		items[index].description = newDescription;
-	}
-	else
-	{
-		//cout << "Error: item not found in inventory";
+		if(f.read(i, &temp) && !temp.UPC.compare(UPC)) // item with correct UPC found
+		{
+			temp.description = newDescription; // Update the description
+			f.update(i, &temp);
+			break; // record found -> break out of loop
+		}
 	}
 }
 
 // Updates the price of an item in the inventory
 void Inventory::changePrice(string UPC, float newPrice)
 {
-	// Search for the item in the inventory
-	int index = findIndex(UPC);
+	fileSize = f.count(); // get number of allocated records in the file
+	Item temp; // temp store for item being read
 
-	// Item was found in the inventory
-	if(index > -1)
+	// iterate through the records
+	for(int i = 0; i < fileSize; i++)
 	{
-		items[index].price = newPrice;
-	}
-	else
-	{
-		//cout << "Error: item not found in inventory";
-	}
-}
-
-// Returns the index of the item in the inventory
-int Inventory::findIndex(string UPC)
-{
-	int index = -1;
-	for(int i = 0; i < sizeof(items)/sizeof(Item); i++)
-	{
-		if(items[i].UPC == UPC)
+		if(f.read(i, &temp) && !temp.UPC.compare(UPC)) // item with correct UPC found
 		{
-			index = i; // If found return it's index
-			break;
+			temp.price = newPrice; // Update the price
+			f.update(i, &temp);
+			break; // record found -> break out of loop
 		}
 	}
-
-	return index;
 }
 
-// This method may be able to replace the one above -- let's look at this
+// Find an item in the inventory (I didn't modify this)
 Item * Inventory::findItem(string UPC)
 {
 	for(int i = 0; i < sizeof(items)/sizeof(Item); i++)
@@ -148,4 +118,20 @@ Item * Inventory::findItem(string UPC)
 		}
 	}
 	return NULL; //item wasnt found
+}
+
+// Builds the stack containing references to deleted records
+void Inventory::buildStack()
+{
+	fileSize = f.count(); // Get number of allocated records in the file
+	Item temp; // Temp store for item being read
+
+	// Iterate through the records
+	for(int i = 0; i < fileSize; i++)
+	{
+		if(f.read(i, &temp) && temp.isDeleted) // Deleted item found
+		{
+			deleted.push(i); //Push the record number onto stack			
+		}
+	}
 }
