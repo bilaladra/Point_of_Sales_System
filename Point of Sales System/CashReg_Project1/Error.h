@@ -9,8 +9,7 @@ using namespace std;
 struct Error
 {
 public:
-	char ErrorCode[3];
-	char ErrorDescription[22];
+	char error[44];
 };
 
 #endif;

@@ -10,23 +10,29 @@
 #include <windows.h>
 #include <string>
 #include "Item.h"
+#include "RFile.h"
+#include <stack>
 
 using namespace std;
 
 class Inventory
 {
 private:
-	int findIndex(string UPC); //Internal item lookup -- may not be neccessary
+	void buildStack(); // Builds stack of deleted records
 
 public:
-	Item items[10]; //Inventory will be a 10 element array for now
 	Inventory(); //Constructor: Instantiate the inventory and add items
-	//void addItem(Item item); //Add an item to the inventory -- REMOVED BECAUSE FIXED ARRAY
-	//void removeItem(string UPC); //Remove an item from the inventory -- REMOVED BECAUSE FIXED ARRAY
-	void adjustStock(string UPC, int newQty); //Update the stock quantity of an inventory item
-	void changeDescription(string UPC, string newDescription); //Update the description of an inventory item
-	void changePrice(string UPC, float newPrice); //Update the price of an inventory item
-	Item * findItem(string UPC); //Retrieve item from the inventory reference
+	~Inventory();
+	RFile *f; // The random access file controller
+	bool addItem(Item item); //Add an item to the inventory -- REMOVED BECAUSE FIXED ARRAY
+	bool removeItem(string UPC); //Remove an item from the inventory -- REMOVED BECAUSE FIXED ARRAY
+	bool adjustStock(string UPC, int newQty); //Update the stock quantity of an inventory item
+	bool changeDescription(string UPC, string newDescription); //Update the description of an inventory item
+	bool changePrice(string UPC, float newPrice); //Update the price of an inventory item
+	bool findItem(string UPC, Item* pFoundItem); //Retrieve item from the inventory reference
+	bool findItem(int rec, Item* pFoundItem); //Retrieve item from the inventory reference
+	stack <int> deleted; // Stack of deleted record references
+	int numRecords; // Reflects the true number of items (*RFile count() used for iteration)
 };
 
 #endif;

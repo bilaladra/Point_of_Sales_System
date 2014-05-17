@@ -79,12 +79,12 @@ bool Tape::addItem(string upc, string description, float price) // add item to t
 	nPtr = new Node();                                      // create a node
 
 	if(nPtr != NULL)
-	{  	
+	{
 		//create an item and set its properties
 		Item *itm = new Item;
-		itm->description = description;
+		strcpy(itm->description, description.c_str());
 		itm->price = price;
-		itm->UPC = upc;
+		strcpy(itm->UPC, upc.c_str());
 
 		nPtr->itemPtr = itm;   // create & link a dynamic Item
 		itemCount++;
@@ -119,7 +119,6 @@ bool Tape::voidItem( string upc)  // remove item # nbr from the list
 			nHead = nPtr->nextPtr;
 			nHead->prevPtr = NULL;
 
-			delete temp;
 			rtn = true;
 		}
 		else if(nPtr == nTail)
@@ -127,7 +126,6 @@ bool Tape::voidItem( string upc)  // remove item # nbr from the list
 			nTail = nPtr->prevPtr;
 			nTail->nextPtr = NULL;
 
-			delete temp;
 			rtn = true;
 		}
 		else
@@ -136,11 +134,11 @@ bool Tape::voidItem( string upc)  // remove item # nbr from the list
 			nPtr->nextPtr->prevPtr = nPtr->prevPtr;
 			nPtr->prevPtr->nextPtr = nPtr->nextPtr;
 
-			delete temp;
 			rtn = true;
 		}
 	}
-
+ 
+	delete temp;
 	return rtn;
 }
 
@@ -160,17 +158,21 @@ void Tape::displayItems()  // display the displaySize newest items
 
 		//draws the string
 		float price = nPtr->itemPtr->price;
-		S.DrawString((char *)(nPtr->itemPtr->description + "-----" + to_string(price)).c_str());
+		string tempDescr;
+		strcpy(nPtr->itemPtr->description, tempDescr.c_str());
+		S.DrawString((char *)(tempDescr + "-----" + to_string(price)).c_str());
 		nPtr = nPtr->nextPtr;
 	}
 }
 
 Node * Tape::find( string upc)  // Private method: find node UPC in list and return a pointer to it
 {
+	string temp;
 	nPtr = nHead;
 	while (nPtr)                   // look at each Item until found
 	{
-		if (nPtr->itemPtr->UPC.compare(upc) == 0)   // if strings are equal
+		strcpy(nPtr->itemPtr->UPC, temp.c_str());
+		if (temp.compare(upc) == 0)   // if strings are equal
 			return nPtr;           // found the node, return a pointer to it in list
 		else
 			nPtr = nPtr->nextPtr;  // move to next Item

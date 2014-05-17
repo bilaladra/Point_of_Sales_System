@@ -15,10 +15,11 @@ using namespace std;
 struct Item
 {
 public:
-	string description;
+	char description[16];
 	float price;
-	string UPC;
-	int QOH;//quantity on hand
+	char UPC[5];
+	int QOH; //quantity on hand
+	bool isDeleted;
 };
 
 #endif;

@@ -1,7 +1,6 @@
 #include "CashReg.h"
 #include "CScreen.h"
 #include "Inventory.h"
-#include "RFile.h"
 
 #pragma once
 class Store
@@ -15,6 +14,7 @@ private:
 
 	void goToRegister();   //starts register
 	void goToInventory();  //goes to inventory
+	void goToErrorLog();   //goes to the error log
 	void displayInstructions( int boxX, int boxY, int length, int width, int color, int storeArea); //function to display instructions dependign on the area of the store
 	void openStore(); //opens the store dialog and has the user choose what they want to do
 
@@ -22,4 +22,3 @@ public:
 	Store(void);
 	~Store(void);
 };
-

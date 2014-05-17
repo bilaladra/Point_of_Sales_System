@@ -23,8 +23,8 @@ CashReg::CashReg()
 	length = 60;
 	width = 13;
 	S; // New not needed here, object created in header file.
-	total = registerTotal = tax = 0.00f;	
-	
+	total = registerTotal = tax = 0.00f;
+
 	tape = new Tape(0,0,width + 9, S); // Create the tape
 
 	displayTotal();
@@ -87,8 +87,8 @@ void CashReg::adjustInventory(string UPC, int qtyToAdjustBy)
 
 void CashReg::addItem(string UPC)
 {
-	Item * lookup = inventory.findItem(UPC);
-	if(lookup != NULL)
+	Item* lookup = new Item;
+	if ( inventory.findItem(UPC, lookup) ) 
 	{
 		tape->addItem(lookup); // Add the item to the tape.
 		total += lookup->price; // Add item price to the total
@@ -99,11 +99,13 @@ void CashReg::addItem(string UPC)
 		displayTotal(); // Print the total.
 		displayItems(); // Reprint the tape.
 	}
-	
+	else
+	{  delete lookup;  }
+
 	/*
 	else
 	{
-		// Error: Item not in the inventory.
+	// Error: Item not in the inventory.
 	}
 	*/
 }
@@ -112,19 +114,24 @@ void CashReg::voidItem(string UPC)
 {
 	if(tape->voidItem(UPC)) // Remove item from the tape.
 	{
-		Item * lookup = inventory.findItem(UPC); // Look-up the item for price info.
-		total -= lookup->price; // Subract item price from total
+		Item * lookup = new Item;
+		if(inventory.findItem(UPC, lookup)) // Look-up the item for price info.
+		{
+			total -= lookup->price; // Subract item price from total
 
-		adjustInventory(UPC, 1);
+			adjustInventory(UPC, 1);
 
-		displayTotal(); // Print the total.
-		displayItems(); // Reprint the tape.
+			displayTotal(); // Print the total.
+			displayItems(); // Reprint the tape.
+		}
+		else
+		{  delete lookup;  }
 	}
 
 	/*
 	else
 	{
-		// Error: Item could not be removed.
+	// Error: Item could not be removed.
 	}
 	*/
 }
@@ -134,9 +141,9 @@ float  CashReg::calcChange(float paid)
 	total += tax;
 	float change;
 	if(paid >= total)
-	{  
-		change = paid - total; 
-		
+	{
+		change = paid - total;
+
 		S.GotoXY(posX+2, posY+6);
 		S.DrawString((char *)("Change:     " + to_string(change)).c_str());
 
@@ -156,10 +163,10 @@ void CashReg::updateRegCash(float paid)
 
 void CashReg::newCustomer()
 {
-	total = tax = 0;	
-	
+	total = tax = 0;
+
 	tape = new Tape(0,0,width + 9, S); // Create the tape
-	
+
 	displayTotal();
 	displayItems();
 }
